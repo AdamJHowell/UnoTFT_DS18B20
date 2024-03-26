@@ -181,14 +181,14 @@ void loop( void )
     tft.println( "Temp 4: 88.8" );
     tft.setTextColor( BLUE );
     tft.println( "Temp 5: 0.12" );
-    tft.setTextColor( INDIGO );
+    tft.setTextColor( WHITE );
     tft.println( "Temp 6: 12.3" );
-    tft.setTextColor( VIOLET );
-    tft.println( "Temp 7: 55" );
-    tft.setTextColor( CYAN );
-    tft.println( 01234.56789 );
-    tft.setTextColor( MAGENTA );
-    tft.println( 0xDEADBEEF, HEX );
+    // tft.setTextColor( VIOLET );
+    // tft.println( "Temp 7: 55" );
+    // tft.setTextColor( CYAN );
+    // tft.println( 01234.56789 );
+    // tft.setTextColor( MAGENTA );
+    // tft.println( 0xDEADBEEF, HEX );
     lastPrintLoop = millis();
   }
 }
