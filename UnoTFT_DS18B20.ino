@@ -1,6 +1,6 @@
+#include <OneWire.h>
 #include <DallasTemperature.h>
 #include <NonBlockingDallas.h> // https://github.com/Gbertaz/NonBlockingDallas
-#include <OneWire.h>
 #include <Elegoo_GFX.h>    // Core graphics library
 #include <Elegoo_TFTLCD.h> // Hardware-specific library
 
@@ -25,12 +25,16 @@
 #define WHITE   0xFFFF
 
 
-const int ONE_WIRE_BUS = 3;
+const int ONE_WIRE_BUS = 12;
 const int TIME_INTERVAL = 1500;
-const unsigned long PRINT_LOOP_DELAY = 5000;
+const unsigned long PRINT_LOOP_DELAY = 2000;
 unsigned long lastPrintLoop = 0;
-float tempF0 = 21.12;
 float tempF1 = 21.12;
+float tempF2 = 21.12;
+float tempF3 = 21.12;
+float tempF4 = 21.12;
+float tempF5 = 21.12;
+float tempF6 = 21.12;
 
 
 Elegoo_TFTLCD tft( LCD_CS, LCD_CD, LCD_WR, LCD_RD, LCD_RESET );
@@ -40,16 +44,24 @@ NonBlockingDallas sensorDs18b20( &dallasTemp );
 
 
 // Invoked at every sensor reading interval.
-void handleIntervalElapsed( int temperature, long int deviceIndex )
+void handleIntervalElapsed( int deviceIndex, long int temperature )
 {
 	Serial.print( "Sensor : " );
 	Serial.print( deviceIndex );
 	Serial.print( " timer temperature " );
-	Serial.println( temperature );
+	Serial.println( sensorDs18b20.rawToFahrenheit( temperature ) );
 	if( deviceIndex == 0 )
-		tempF0 = temperature;
+		tempF1 = sensorDs18b20.rawToFahrenheit( temperature );
 	else if( deviceIndex == 1 )
-		tempF1 = temperature;
+		tempF2 = sensorDs18b20.rawToFahrenheit( temperature );
+	else if( deviceIndex == 2 )
+		tempF3 = sensorDs18b20.rawToFahrenheit( temperature );
+	else if( deviceIndex == 3 )
+		tempF4 = sensorDs18b20.rawToFahrenheit( temperature );
+	else if( deviceIndex == 4 )
+		tempF5 = sensorDs18b20.rawToFahrenheit( temperature );
+	else if( deviceIndex == 5 )
+		tempF6 = sensorDs18b20.rawToFahrenheit( temperature );
 	else
   {
 		Serial.print( "Unexpected device index: " );
@@ -59,22 +71,39 @@ void handleIntervalElapsed( int temperature, long int deviceIndex )
 
 
 // Invoked ONLY when the temperature changes.
-void handleTemperatureChange( int temperature, long int deviceIndex )
+void handleTemperatureChange( int deviceIndex, long int temperature )
 {
 	Serial.print( "Sensor : " );
 	Serial.print( deviceIndex );
 	Serial.print( " changed temperature " );
-	Serial.println( temperature );
+	Serial.println( sensorDs18b20.rawToFahrenheit( temperature ) );
 	if( deviceIndex == 0 )
-		tempF0 = temperature;
+		tempF1 = sensorDs18b20.rawToFahrenheit( temperature );
 	else if( deviceIndex == 1 )
-		tempF1 = temperature;
+		tempF2 = sensorDs18b20.rawToFahrenheit( temperature );
+	else if( deviceIndex == 2 )
+		tempF3 = sensorDs18b20.rawToFahrenheit( temperature );
+	else if( deviceIndex == 3 )
+		tempF4 = sensorDs18b20.rawToFahrenheit( temperature );
+	else if( deviceIndex == 4 )
+		tempF5 = sensorDs18b20.rawToFahrenheit( temperature );
+	else if( deviceIndex == 5 )
+		tempF6 = sensorDs18b20.rawToFahrenheit( temperature );
   else
   {
 		Serial.print( "Unexpected device index: " );
     Serial.println( deviceIndex );
   }
 } // End of the handleTemperatureChange() function.
+
+
+// Invoked when the sensor reading fails.
+void handleDeviceDisconnected( int deviceIndex )
+{
+  Serial.print( F("[NonBlockingDallas] handleDeviceDisconnected ==> deviceIndex=" ) );
+  Serial.print( deviceIndex );
+  Serial.println( F( " disconnected." ) );
+}
 
 
 void setup( void )
@@ -88,6 +117,7 @@ void setup( void )
 	// Set up the temperature sensor callbacks.
 	sensorDs18b20.onIntervalElapsed( handleIntervalElapsed );
 	sensorDs18b20.onTemperatureChange( handleTemperatureChange );
+  sensorDs18b20.onDeviceDisconnected( handleDeviceDisconnected );
 
 	// Call the following function to request a new temperature reading without waiting for TIME_INTERVAL to elapse.
 	sensorDs18b20.requestTemperature();
@@ -152,41 +182,47 @@ void setup( void )
     Serial.println( F( "matches the tutorial." ) );
     identifier = 0x9328;
   }
+
   tft.begin( identifier );
-	Serial.println( F("Setup has finished.") );
+  tft.fillScreen( BLACK );
+  // 0 = oriented with USB port down.
+  // 1 = oriented with USB port right.
+  // 2 = oriented with USB port up.
+  // 3 = oriented with USB port left.
+  tft.setRotation( 3 );
+  tft.setTextSize( 3 );
+
+	Serial.println( F( "Setup has finished." ) );
 }
 
 
 void loop( void )
 {
 	sensorDs18b20.update();
+
   if(( lastPrintLoop == 0 ) || ( millis() - lastPrintLoop ) > PRINT_LOOP_DELAY )
   {
     tft.fillScreen( BLACK );
-    // 0 = oriented with USB port down.
-    // 1 = oriented with USB port right.
-    // 2 = oriented with USB port up.
-    // 3 = oriented with USB port left.
-    tft.setRotation( 3 );
     tft.setCursor( 0, 0 );
-    tft.setTextSize( 3 );
 
     tft.setTextColor( RED );
-    tft.println( "Temp 1: 73.3" );
+    tft.print( "Temp 1: " );
+    tft.println( tempF1 );
     tft.setTextColor( ORANGE );
-    tft.println( "Temp 2: 123.4" );
+    tft.print( "Temp 2: " );
+    tft.println( tempF2 );
     tft.setTextColor( YELLOW );
-    tft.println( "Temp 3: 21.12" );
+    tft.print( "Temp 3: " );
+    tft.println( tempF3 );
     tft.setTextColor( GREEN );
-    tft.println( "Temp 4: 88.8" );
+    tft.print( "Temp 4: " );
+    tft.println( tempF4 );
     tft.setTextColor( BLUE );
-    tft.println( "Temp 5: 0.12" );
+    tft.print( "Temp 5: " );
+    tft.println( tempF5 );
     tft.setTextColor( WHITE );
-    tft.println( "Temp 6: 12.3" );
-    // tft.setTextColor( VIOLET );
-    // tft.println( "Temp 7: 55" );
-    // tft.setTextColor( CYAN );
-    // tft.println( 01234.56789 );
+    tft.print( "Temp 5: " );
+    tft.println( tempF6 );
     // tft.setTextColor( MAGENTA );
     // tft.println( 0xDEADBEEF, HEX );
     lastPrintLoop = millis();
