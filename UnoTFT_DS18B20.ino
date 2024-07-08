@@ -133,6 +133,7 @@ void handleDeviceDisconnected( int deviceIndex )
   Serial.print( F("[NonBlockingDallas] handleDeviceDisconnected ==> deviceIndex=" ) );
   Serial.print( deviceIndex );
   Serial.println( F( " disconnected." ) );
+  printAddresses();
 }
 
 
