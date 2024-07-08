@@ -1,8 +1,18 @@
-#include <OneWire.h>
-#include <DallasTemperature.h>
-#include <NonBlockingDallas.h> // https://github.com/Gbertaz/NonBlockingDallas
-#include <Elegoo_GFX.h>    // Core graphics library
-#include <Elegoo_TFTLCD.h> // Hardware-specific library
+/*
+ * Elegoo 2.8" TFT touchscreen for the Arduino Uno - https://www.amazon.com/gp/product/B01EUVJYME/
+ * Download the zipped manual from https://www.elegoo.com/blogs/arduino-projects/elegoo-2-8-inch-touch-screen-for-raspberry-pi-manual
+ * Then install using: Sketch -> Include Library -> Add .ZIP Library
+ * 
+ * My three devices:
+ *   28285410000000BB
+ *   2845FF0D000000D4
+ *   2855D10B000000DC
+ */
+#include <NonBlockingDallas.h> // by Giovanno Bertazzoni - https://github.com/Gbertaz/NonBlockingDallas
+#include <DallasTemperature.h> // By Miles Burton - https://github.com/milesburton/Arduino-Temperature-Control-Library
+#include <OneWire.h>           // by Jum Studt - https://www.pjrc.com/teensy/td_libs_OneWire.html
+#include <Elegoo_GFX.h>        // Core graphics library - https://www.elegoo.com/blogs/arduino-projects/elegoo-2-8-inch-touch-screen-for-raspberry-pi-manual
+#include <Elegoo_TFTLCD.h>     // Hardware-specific library - https://www.elegoo.com/blogs/arduino-projects/elegoo-2-8-inch-touch-screen-for-raspberry-pi-manual
 
 
 // Elegoo TFT screen pins.
@@ -13,8 +23,8 @@
 #define LCD_RESET A4  // Can alternately just connect to Arduino's reset pin
 // Assign RGB565 color codes to human-readable names. More colors can be found at: https://github.com/newdigate/rgb565_colors
 #define	BLACK   0x0000
-#define	RED     0xF800
-#define ORANGE  0xFBE0
+#define	RED     0xFBE0
+#define ORANGE  0xFF90
 #define YELLOW  0xFFE0
 #define	GREEN   0x07E0
 #define	BLUE    0x001F
@@ -23,6 +33,7 @@
 #define CYAN    0x07FF
 #define MAGENTA 0xF81F
 #define WHITE   0xFFFF
+#define BROWN   0xCA0A
 
 
 const int ONE_WIRE_BUS = 12;
@@ -41,6 +52,25 @@ Elegoo_TFTLCD tft( LCD_CS, LCD_CD, LCD_WR, LCD_RD, LCD_RESET );
 OneWire oneWire( ONE_WIRE_BUS );
 DallasTemperature dallasTemp( &oneWire );
 NonBlockingDallas sensorDs18b20( &dallasTemp );
+
+
+// Find every device on the bus.
+void printAddresses()
+{
+  // Search for devices on the OneWire bus.
+  byte address[8];
+  while( oneWire.search( address ) )
+  {
+    Serial.print( "Found device with address: " );
+    for( byte i = 0; i < 8; i++ )
+    {
+      if( address[i] < 16 )
+        Serial.print( "0" );
+      Serial.print( address[i], HEX );
+    }
+    Serial.println();
+  }
+}
 
 
 // Invoked at every sensor reading interval.
@@ -192,6 +222,8 @@ void setup( void )
   tft.setRotation( 3 );
   tft.setTextSize( 3 );
 
+  printAddresses();
+
 	Serial.println( F( "Setup has finished." ) );
 }
 
@@ -206,22 +238,22 @@ void loop( void )
     tft.setCursor( 0, 0 );
 
     tft.setTextColor( RED );
-    tft.print( "Temp 1: " );
+    tft.print( "Vent:    " );
     tft.println( tempF1 );
     tft.setTextColor( ORANGE );
-    tft.print( "Temp 2: " );
+    tft.print( "Ambient: " );
     tft.println( tempF2 );
     tft.setTextColor( YELLOW );
-    tft.print( "Temp 3: " );
+    tft.print( "Floor:   " );
     tft.println( tempF3 );
     tft.setTextColor( GREEN );
-    tft.print( "Temp 4: " );
+    tft.print( "Temp 4:  " );
     tft.println( tempF4 );
     tft.setTextColor( BLUE );
-    tft.print( "Temp 5: " );
+    tft.print( "Temp 5:  " );
     tft.println( tempF5 );
     tft.setTextColor( WHITE );
-    tft.print( "Temp 5: " );
+    tft.print( "Temp 5:  " );
     tft.println( tempF6 );
     // tft.setTextColor( MAGENTA );
     // tft.println( 0xDEADBEEF, HEX );
