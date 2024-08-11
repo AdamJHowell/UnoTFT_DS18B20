@@ -7,11 +7,24 @@
  *   28285410000000BB
  *   2845FF0D000000D4
  *   2855D10B000000DC
+ * 
+ * Typical run:
+ * Found 0x9341 LCD driver
+ * Found device with address: 28285410000000BB
+ * Found device with address: 2845FF0D000000D4
+ * Found device with address: 2855D10B000000DC
+ * Setup has finished.
+ * Sensor : 0 timer temperature 70.25
+ * Sensor : 0 changed temperature 70.25
+ * Sensor : 1 timer temperature 69.80
+ * Sensor : 1 changed temperature 69.80
+ * Sensor : 2 timer temperature 70.02
+ * Sensor : 2 changed temperature 70.02
  */
 #include <NonBlockingDallas.h> // by Giovanno Bertazzoni - https://github.com/Gbertaz/NonBlockingDallas
 #include <DallasTemperature.h> // By Miles Burton - https://github.com/milesburton/Arduino-Temperature-Control-Library
 #include <OneWire.h>           // by Jum Studt - https://www.pjrc.com/teensy/td_libs_OneWire.html
-#include <Elegoo_GFX.h>        // Core graphics library - https://www.elegoo.com/blogs/arduino-projects/elegoo-2-8-inch-touch-screen-for-raspberry-pi-manual
+#include <Elegoo_GFX.h>        // Core graphics library used by Elegoo_TFTLCD - https://www.elegoo.com/blogs/arduino-projects/elegoo-2-8-inch-touch-screen-for-raspberry-pi-manual
 #include <Elegoo_TFTLCD.h>     // Hardware-specific library - https://www.elegoo.com/blogs/arduino-projects/elegoo-2-8-inch-touch-screen-for-raspberry-pi-manual
 
 
@@ -36,10 +49,15 @@
 #define BROWN   0xCA0A
 
 
+// The pin that the One-Wire bus is connected to.
 const int ONE_WIRE_BUS = 12;
+// The interval between timed sensor polls.
 const int TIME_INTERVAL = 1500;
+// The interval between Serial terminal printouts.
 const unsigned long PRINT_LOOP_DELAY = 2000;
+// A variable to keep track of the last print time.
 unsigned long lastPrintLoop = 0;
+// The temperature variables.
 float tempF1 = 21.12;
 float tempF2 = 21.12;
 float tempF3 = 21.12;
@@ -55,22 +73,32 @@ NonBlockingDallas sensorDs18b20( &dallasTemp );
 
 
 // Find every device on the bus.
-void printAddresses()
+void findDevices() 
 {
-  // Search for devices on the OneWire bus.
   byte address[8];
-  while( oneWire.search( address ) )
+
+  // Reset the search.
+  oneWire.reset_search();
+  
+  while( oneWire.search( address ) ) 
   {
     Serial.print( "Found device with address: " );
-    for( byte i = 0; i < 8; i++ )
+    printAddress( address );
+    Serial.println();
+  }
+} // End of findDevices() function.
+
+
+// Print the address that was found.
+void printAddress( byte *address )
+{
+    for ( int i = 0; i < 8; i++ )
     {
       if( address[i] < 16 )
         Serial.print( "0" );
       Serial.print( address[i], HEX );
     }
-    Serial.println();
-  }
-}
+} // End of printAddress() function.
 
 
 // Invoked at every sensor reading interval.
@@ -130,11 +158,23 @@ void handleTemperatureChange( int deviceIndex, long int temperature )
 // Invoked when the sensor reading fails.
 void handleDeviceDisconnected( int deviceIndex )
 {
-  Serial.print( F("[NonBlockingDallas] handleDeviceDisconnected ==> deviceIndex=" ) );
+  Serial.print( F("\n  Sensor # " ) );
   Serial.print( deviceIndex );
-  Serial.println( F( " disconnected." ) );
-  printAddresses();
-}
+  Serial.println( F( " disconnected!\n" ) );
+  // Reset the temperature variable to show there was a disconnect.
+	if( deviceIndex == 0 )
+		tempF1 = 21.13;
+	else if( deviceIndex == 1 )
+		tempF2 = 21.13;
+	else if( deviceIndex == 2 )
+		tempF3 = 21.13;
+	else if( deviceIndex == 3 )
+		tempF4 = 21.13;
+	else if( deviceIndex == 4 )
+		tempF5 = 21.13;
+	else if( deviceIndex == 5 )
+		tempF6 = 21.13;
+} // End of handleDeviceDisconnected() function.
 
 
 void setup( void )
@@ -223,10 +263,10 @@ void setup( void )
   tft.setRotation( 3 );
   tft.setTextSize( 3 );
 
-  printAddresses();
+  findDevices();
 
 	Serial.println( F( "Setup has finished." ) );
-}
+} // End of setup() function.
 
 
 void loop( void )
@@ -239,25 +279,25 @@ void loop( void )
     tft.setCursor( 0, 0 );
 
     tft.setTextColor( RED );
-    tft.print( "Vent:    " );
+    tft.print( "Vent:     " );
     tft.println( tempF1 );
     tft.setTextColor( ORANGE );
-    tft.print( "Ambient: " );
+    tft.print( "Ambient:  " );
     tft.println( tempF2 );
     tft.setTextColor( YELLOW );
-    tft.print( "Floor:   " );
+    tft.print( "Floor:    " );
     tft.println( tempF3 );
     tft.setTextColor( GREEN );
-    tft.print( "Temp 4:  " );
+    tft.print( "Roof:     " );
     tft.println( tempF4 );
     tft.setTextColor( BLUE );
-    tft.print( "Temp 5:  " );
+    tft.print( "Trunk:    " );
     tft.println( tempF5 );
     tft.setTextColor( WHITE );
-    tft.print( "Temp 5:  " );
+    tft.print( "Outside:  " );
     tft.println( tempF6 );
     // tft.setTextColor( MAGENTA );
     // tft.println( 0xDEADBEEF, HEX );
     lastPrintLoop = millis();
   }
-}
+} // End of loop() function.
