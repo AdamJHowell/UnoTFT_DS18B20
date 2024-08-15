@@ -57,6 +57,7 @@ const int TIME_INTERVAL = 1500;
 const unsigned long PRINT_LOOP_DELAY = 2000;
 // A variable to keep track of the last print time.
 unsigned long lastPrintLoop = 0;
+unsigned int resetCount = 0;
 // The temperature variables.
 float tempF1 = 21.12;
 float tempF2 = 21.12;
@@ -158,6 +159,7 @@ void handleTemperatureChange( int deviceIndex, long int temperature )
 // Invoked when the sensor reading fails.
 void handleDeviceDisconnected( int deviceIndex )
 {
+  resetCount++;
   Serial.print( F("\n  Sensor # " ) );
   Serial.print( deviceIndex );
   Serial.println( F( " disconnected!\n" ) );
@@ -277,6 +279,7 @@ void loop( void )
   {
     tft.fillScreen( BLACK );
     tft.setCursor( 0, 0 );
+    tft.setTextSize( 3 ),
 
     tft.setTextColor( RED );
     tft.print( "Vent:     " );
@@ -298,6 +301,15 @@ void loop( void )
     tft.println( tempF6 );
     // tft.setTextColor( MAGENTA );
     // tft.println( 0xDEADBEEF, HEX );
+    tft.println( "" );
+
+    tft.setTextSize( 2 ),
+    tft.setTextColor( WHITE );
+    tft.print( "Resets: " );
+    tft.println( resetCount );
+    lastPrintLoop = millis();
+    tft.print( "Sensors: " );
+    tft.println( sensorDs18b20.getSensorsCount() );
     lastPrintLoop = millis();
   }
 } // End of loop() function.
