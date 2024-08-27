@@ -10,4 +10,4 @@ The 3D printing plans can be downloaded [here](https://www.thingiverse.com/thing
 
 The Fritzing schematic for the daughter board is [here](https://github.com/AdamJHowell/DS18B20-Holder-x6).
 
-![The project running with 3 sensors](1INANHN.jpg)
+![The project running with 3 sensors](https://github.com/AdamJHowell/UnoTFT_DS18B20/blob/master/3%20sensors.jpg)
