@@ -7,3 +7,7 @@ This project uses an Arduino UNO R3 to display the values read from DS18B20 temp
 [DS18B20 sensors](https://www.amazon.com/gp/product/B0BJK8BKYG/)
 
 The 3D printing plans can be downloaded [here](https://www.thingiverse.com/thing:6745784).
+
+The Fritzing schematic for the daughter board is [here](https://github.com/AdamJHowell/DS18B20-Holder-x6).
+
+![The project running with 3 sensors](https://i.imgur.com/1INANHN.jpg)
