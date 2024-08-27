@@ -65,6 +65,7 @@ float tempF3 = 21.12;
 float tempF4 = 21.12;
 float tempF5 = 21.12;
 float tempF6 = 21.12;
+uint8_t errorBits[8] = {0, 0, 0, 0, 0, 0, 0, 0};
 
 
 Elegoo_TFTLCD tft( LCD_CS, LCD_CD, LCD_WR, LCD_RD, LCD_RESET );
@@ -132,6 +133,8 @@ void handleIntervalElapsed( int deviceIndex, long int temperature )
 // Invoked ONLY when the temperature changes.
 void handleTemperatureChange( int deviceIndex, long int temperature )
 {
+  // Set the device error bit to zero.
+  errorBits[deviceIndex] = 0;
 	Serial.print( "Sensor : " );
 	Serial.print( deviceIndex );
 	Serial.print( " changed temperature " );
@@ -160,22 +163,24 @@ void handleTemperatureChange( int deviceIndex, long int temperature )
 void handleDeviceDisconnected( int deviceIndex )
 {
   resetCount++;
+  // Set the device error bit to 1 to show that this sensor had an error.
+  errorBits[deviceIndex] = 1;
   Serial.print( F("\n  Sensor # " ) );
   Serial.print( deviceIndex );
   Serial.println( F( " disconnected!\n" ) );
   // Reset the temperature variable to show there was a disconnect.
 	if( deviceIndex == 0 )
-		tempF1 = 21.13;
+		tempF1 = 11.11;
 	else if( deviceIndex == 1 )
-		tempF2 = 21.13;
+		tempF2 = 11.11;
 	else if( deviceIndex == 2 )
-		tempF3 = 21.13;
+		tempF3 = 11.11;
 	else if( deviceIndex == 3 )
-		tempF4 = 21.13;
+		tempF4 = 11.11;
 	else if( deviceIndex == 4 )
-		tempF5 = 21.13;
+		tempF5 = 11.11;
 	else if( deviceIndex == 5 )
-		tempF6 = 21.13;
+		tempF6 = 11.11;
 } // End of handleDeviceDisconnected() function.
 
 
@@ -308,8 +313,18 @@ void loop( void )
     tft.print( "Resets: " );
     tft.println( resetCount );
     lastPrintLoop = millis();
+
     tft.print( "Sensors: " );
     tft.println( sensorDs18b20.getSensorsCount() );
+
+    tft.print( "Error bits: " );
+    static char binaryString[7];
+    for (int i = 0; i < 6; i++)
+      binaryString[i] = errorBits[i] ? '1' : '0';
+    // Add the null terminator.
+    binaryString[6] = '\0';
+    tft.println( binaryString );
+
     lastPrintLoop = millis();
   }
 } // End of loop() function.
