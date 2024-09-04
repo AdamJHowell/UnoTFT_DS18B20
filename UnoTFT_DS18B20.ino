@@ -9,17 +9,7 @@
  *   2855D10B000000DC
  * 
  * Typical run:
- * Found 0x9341 LCD driver
- * Found device with address: 28285410000000BB
- * Found device with address: 2845FF0D000000D4
- * Found device with address: 2855D10B000000DC
- * Setup has finished.
- * Sensor : 0 timer temperature 70.25
- * Sensor : 0 changed temperature 70.25
- * Sensor : 1 timer temperature 69.80
- * Sensor : 1 changed temperature 69.80
- * Sensor : 2 timer temperature 70.02
- * Sensor : 2 changed temperature 70.02
+ * 
  */
 #include "UnoTFT_DS18B20.h"
 
@@ -89,7 +79,7 @@ void setupDallas()
    Serial.print( numberOfDevices );
    Serial.println( " devices." );
 
-   // Loop through each device, get its address and print it
+   // Loop through each device, get its address, and print it
    for( int i = 0; i < numberOfDevices; i++ )
    {
       uint8_t address[8];
@@ -220,30 +210,6 @@ void loop( void )
 
    if(( lastPrintLoop == 0 ) || ( millis() - lastPrintLoop ) > PRINT_LOOP_DELAY )
    {
-      tft.fillScreen( BLACK );
-      tft.setCursor( 0, 0 );
-      tft.setTextSize( 3 ),
-
-      tft.setTextColor( RED );
-      tft.print( "Vent:     " );
-      tft.println( tempF1 );
-      tft.setTextColor( ORANGE );
-      tft.print( "Ambient:  " );
-      tft.println( tempF2 );
-      tft.setTextColor( YELLOW );
-      tft.print( "Floor:    " );
-      tft.println( tempF3 );
-      tft.setTextColor( GREEN );
-      tft.print( "Roof:     " );
-      tft.println( tempF4 );
-      tft.setTextColor( BLUE );
-      tft.print( "Trunk:    " );
-      tft.println( tempF5 );
-      tft.setTextColor( WHITE );
-      tft.print( "Outside:  " );
-      tft.println( tempF6 );
-      tft.println( "" );
-
       unsigned int sensorCount = dallasTemp.getDS18Count();
       if( sensorCount == 0 )
          zeroSensors++;
@@ -255,11 +221,36 @@ void loop( void )
          zeroSensors = 0;
          setupDallas();
       }
-      tft.print( "Sensors: " );
-      tft.println( sensorCount );
+
+      tft.fillScreen( BLACK );
+      tft.setCursor( 0, 0 );
+      tft.setTextSize( 3 ),
+
+      tft.setTextColor( RED );
+      tft.print( "Vent:    " );
+      tft.println( tempF1 );
+      tft.setTextColor( ORANGE );
+      tft.print( "Ambient: " );
+      tft.println( tempF2 );
+      tft.setTextColor( YELLOW );
+      tft.print( "Floor:   " );
+      tft.println( tempF3 );
+      tft.setTextColor( GREEN );
+      tft.print( "Roof:    " );
+      tft.println( tempF4 );
+      tft.setTextColor( BLUE );
+      tft.print( "Trunk:   " );
+      tft.println( tempF5 );
+      tft.setTextColor( WHITE );
+      tft.print( "Outside: " );
+      tft.println( tempF6 );
 
       tft.setTextSize( 2 ),
       tft.setTextColor( WHITE );
+      tft.println( "" );
+
+      tft.print( "Sensors: " );
+      tft.println( sensorCount );
 
       tft.print( "Setup count: " );
       tft.println( setupCount );
