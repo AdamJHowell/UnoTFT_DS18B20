@@ -1,11 +1,12 @@
 cmake_minimum_required( VERSION 3.25 )
-project( ESP32_CPU_Memory_Info )
+project( UnoTFT_DS18B20 )
 
 set( CMAKE_CXX_STANDARD 14 )
 
 include_directories( . )
 
-add_executable( ESP32_CPU_Memory_Info
-		ESP32_CPU_Memory_Info.ino )
+add_executable( UnoTFT_DS18B20
+		UnoTFT_DS18B20.ino
+)
 
-set_target_properties( ESP32_CPU_Memory_Info PROPERTIES LINKER_LANGUAGE CXX )
+set_target_properties( UnoTFT_DS18B20 PROPERTIES LINKER_LANGUAGE CXX )
