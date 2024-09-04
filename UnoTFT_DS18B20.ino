@@ -21,7 +21,6 @@
  * Sensor : 2 timer temperature 70.02
  * Sensor : 2 changed temperature 70.02
  */
-#include <NonBlockingDallas.h>   // by Giovanno Bertazzoni - https://github.com/Gbertaz/NonBlockingDallas
 #include <DallasTemperature.h>   // By Miles Burton - https://github.com/milesburton/Arduino-Temperature-Control-Library
 #include <OneWire.h>            // by Jum Studt - https://www.pjrc.com/teensy/td_libs_OneWire.html
 #include <Elegoo_GFX.h>         // Core graphics library used by Elegoo_TFTLCD - https://www.elegoo.com/blogs/arduino-projects/elegoo-2-8-inch-touch-screen-for-raspberry-pi-manual
@@ -56,11 +55,10 @@ const int ONE_WIRE_BUS = 12;
 const int TIME_INTERVAL = 1500;
 // The interval between Serial terminal printouts.
 const unsigned long PRINT_LOOP_DELAY = 2000;
+const unsigned long POLL_LOOP_DELAY = 700;
 // A variable to keep track of the last print time.
 unsigned long lastPrintLoop = 0;
-// A variable to keep track of sensor resets.
-unsigned int resetCount = 0;
-unsigned int zeroSensors = 0;
+unsigned long lastPollLoop = 0;
 unsigned int setupCount = 0;
 // The temperature variables.
 float tempF1 = 21.12;
@@ -75,7 +73,6 @@ uint8_t errorBits[8] = {0, 0, 0, 0, 0, 0, 0, 0};
 Elegoo_TFTLCD tft( LCD_CS, LCD_CD, LCD_WR, LCD_RD, LCD_RESET );
 OneWire oneWire( ONE_WIRE_BUS );
 DallasTemperature dallasTemp( &oneWire );
-NonBlockingDallas sensorDs18b20( &dallasTemp );
 
 
 // Find every device on the bus.
@@ -107,87 +104,6 @@ void printAddress( byte *address )
 } // End of printAddress() function.
 
 
-// Invoked at every sensor reading interval.
-void handleIntervalElapsed( int deviceIndex, long int temperature )
-{
-   Serial.print( "Sensor : " );
-   Serial.print( deviceIndex );
-   Serial.print( " timer temperature " );
-   Serial.println( sensorDs18b20.rawToFahrenheit( temperature ) );
-   if( deviceIndex == 0 )
-      tempF1 = sensorDs18b20.rawToFahrenheit( temperature );
-   else if( deviceIndex == 1 )
-      tempF2 = sensorDs18b20.rawToFahrenheit( temperature );
-   else if( deviceIndex == 2 )
-      tempF3 = sensorDs18b20.rawToFahrenheit( temperature );
-   else if( deviceIndex == 3 )
-      tempF4 = sensorDs18b20.rawToFahrenheit( temperature );
-   else if( deviceIndex == 4 )
-      tempF5 = sensorDs18b20.rawToFahrenheit( temperature );
-   else if( deviceIndex == 5 )
-      tempF6 = sensorDs18b20.rawToFahrenheit( temperature );
-   else
-   {
-      Serial.print( "Unexpected device index: " );
-      Serial.println( deviceIndex );
-   }
-} // End of the handleIntervalElapsed() function.
-
-
-// Invoked ONLY when the temperature changes.
-void handleTemperatureChange( int deviceIndex, long int temperature )
-{
-   // Set the device error bit to zero.
-   errorBits[deviceIndex] = 0;
-   Serial.print( "Sensor : " );
-   Serial.print( deviceIndex );
-   Serial.print( " changed temperature " );
-   Serial.println( sensorDs18b20.rawToFahrenheit( temperature ) );
-   if( deviceIndex == 0 )
-      tempF1 = sensorDs18b20.rawToFahrenheit( temperature );
-   else if( deviceIndex == 1 )
-      tempF2 = sensorDs18b20.rawToFahrenheit( temperature );
-   else if( deviceIndex == 2 )
-      tempF3 = sensorDs18b20.rawToFahrenheit( temperature );
-   else if( deviceIndex == 3 )
-      tempF4 = sensorDs18b20.rawToFahrenheit( temperature );
-   else if( deviceIndex == 4 )
-      tempF5 = sensorDs18b20.rawToFahrenheit( temperature );
-   else if( deviceIndex == 5 )
-      tempF6 = sensorDs18b20.rawToFahrenheit( temperature );
-   else
-   {
-      Serial.print( "Unexpected device index: " );
-      Serial.println( deviceIndex );
-   }
-} // End of the handleTemperatureChange() function.
-
-
-// Invoked when the sensor reading fails.
-void handleDeviceDisconnected( int deviceIndex )
-{
-   resetCount++;
-   // Set the device error bit to 1 to show that this sensor had an error.
-   errorBits[deviceIndex] = 1;
-   Serial.print( F("\n  Sensor # " ) );
-   Serial.print( deviceIndex );
-   Serial.println( F( " disconnected!\n" ) );
-   // Reset the temperature variable to show there was a disconnect.
-   if( deviceIndex == 0 )
-      tempF1 = 11.11;
-   else if( deviceIndex == 1 )
-      tempF2 = 11.11;
-   else if( deviceIndex == 2 )
-      tempF3 = 11.11;
-   else if( deviceIndex == 3 )
-      tempF4 = 11.11;
-   else if( deviceIndex == 4 )
-      tempF5 = 11.11;
-   else if( deviceIndex == 5 )
-      tempF6 = 11.11;
-} // End of handleDeviceDisconnected() function.
-
-
 void reboot()
 {
    Serial.println( "Rebooting the device..." );
@@ -209,15 +125,10 @@ void reboot()
 void setupDallas()
 {
    // Initialize the sensor passing the resolution and interval [milliseconds].
-   sensorDs18b20.begin( NonBlockingDallas::resolution_12, TIME_INTERVAL );
+   dallasTemp.begin();
 
-   // Set up the temperature sensor callbacks.
-   sensorDs18b20.onIntervalElapsed( handleIntervalElapsed );
-   sensorDs18b20.onTemperatureChange( handleTemperatureChange );
-   sensorDs18b20.onDeviceDisconnected( handleDeviceDisconnected );
-
-   // Call the following function to request a new temperature reading without waiting for TIME_INTERVAL to elapse.
-   sensorDs18b20.requestTemperature();
+   // Request a new temperature reading.
+   dallasTemp.requestTemperatures();
 
    // Increment a counter tracking how often these sensors have been configured.
    setupCount++;
@@ -313,9 +224,26 @@ void setup( void )
 } // End of setup() function.
 
 
+void pollTelemetry()
+{
+   // Request a new temperature reading.
+   dallasTemp.requestTemperatures();
+   tempF1 = dallasTemp.getTempFByIndex( 0 );
+   tempF2 = dallasTemp.getTempFByIndex( 1 );
+   tempF3 = dallasTemp.getTempFByIndex( 2 );
+   tempF4 = dallasTemp.getTempFByIndex( 3 );
+   tempF5 = dallasTemp.getTempFByIndex( 4 );
+   tempF6 = dallasTemp.getTempFByIndex( 5 );
+} // End of pollTelemetry() function.
+
+
 void loop( void )
 {
-   sensorDs18b20.update();
+   if(( lastPollLoop == 0 ) || ( millis() - lastPollLoop ) > POLL_LOOP_DELAY )
+   {
+      pollTelemetry();
+      lastPollLoop = millis();
+   }
 
    if(( lastPrintLoop == 0 ) || ( millis() - lastPrintLoop ) > PRINT_LOOP_DELAY )
    {
@@ -341,37 +269,10 @@ void loop( void )
       tft.setTextColor( WHITE );
       tft.print( "Outside:  " );
       tft.println( tempF6 );
-      // tft.setTextColor( MAGENTA );
-      // tft.println( 0xDEADBEEF, HEX );
       tft.println( "" );
 
       tft.setTextSize( 2 ),
       tft.setTextColor( WHITE );
-      tft.print( "Resets: " );
-      tft.println( resetCount );
-      lastPrintLoop = millis();
-
-      unsigned int sensorCount = sensorDs18b20.getSensorsCount();
-      if( sensorCount == 0 )
-         zeroSensors++;
-      else
-         zeroSensors = 0;
-      // Reset the one-wire interface if there has been 20 seconds of no sensors detected.
-      if( zeroSensors > 10 )
-      {
-         zeroSensors = 0;
-         setupDallas();
-      }
-      tft.print( "Sensors: " );
-      tft.println( sensorCount );
-
-      tft.print( "Error bits: " );
-      static char binaryString[7];
-      for (int i = 0; i < 6; i++)
-         binaryString[i] = errorBits[i] ? '1' : '0';
-      // Add the null terminator.
-      binaryString[6] = '\0';
-      tft.println( binaryString );
 
       tft.print( "Setup count: " );
       tft.println( setupCount );
