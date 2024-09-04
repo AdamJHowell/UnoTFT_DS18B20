@@ -221,12 +221,13 @@ void setupDallas()
 
    // Increment a counter tracking how often these sensors have been configured.
    setupCount++;
+   findDevices();
 
    // Reset the device if this method has been called 5 times.
    if( setupCount > 5 )
       reboot();
    if( setupCount > 1 )
-   Serial.println( "Finished setting up one-wire again." );
+      Serial.println( "Finished setting up one-wire again." );
 } // End of setupDallas() function.
 
 
@@ -308,8 +309,6 @@ void setup( void )
    tft.setRotation( 3 );
    tft.setTextSize( 3 );
 
-   findDevices();
-
    Serial.println( F( "Setup has finished." ) );
 } // End of setup() function.
 
@@ -352,8 +351,7 @@ void loop( void )
       tft.println( resetCount );
       lastPrintLoop = millis();
 
-
-      int sensorCount = sensorDs18b20.getSensorsCount();
+      unsigned int sensorCount = sensorDs18b20.getSensorsCount();
       if( sensorCount == 0 )
          zeroSensors++;
       else
