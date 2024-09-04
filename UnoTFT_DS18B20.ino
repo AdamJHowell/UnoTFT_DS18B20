@@ -59,6 +59,7 @@ const unsigned long POLL_LOOP_DELAY = 700;
 // A variable to keep track of the last print time.
 unsigned long lastPrintLoop = 0;
 unsigned long lastPollLoop = 0;
+unsigned int zeroSensors = 0;
 unsigned int setupCount = 0;
 // The temperature variables.
 float tempF1 = 21.12;
@@ -133,6 +134,30 @@ void setupDallas()
    // Increment a counter tracking how often these sensors have been configured.
    setupCount++;
    findDevices();
+
+   // Get the number of devices on the bus
+   int numberOfDevices = dallasTemp.getDeviceCount();
+   Serial.print( "Found " );
+   Serial.print( numberOfDevices );
+   Serial.println( " devices." );
+
+   // Loop through each device, get its address and print it
+   for( int i = 0; i < numberOfDevices; i++ )
+   {
+      uint8_t address[8];
+      if( dallasTemp.getAddress( address, i ) )
+      {
+         Serial.print( "Device " );
+         Serial.print( i );
+         Serial.print( " Address: " );
+         printAddress( address );
+      }
+      else
+      {
+         Serial.print( "Unable to find address for Device " );
+         Serial.println( i );
+      }
+   }
 
    // Reset the device if this method has been called 5 times.
    if( setupCount > 5 )
@@ -210,8 +235,8 @@ void setup( void )
       Serial.println( F( "matches the tutorial." ) );
       identifier = 0x9328;
    }
-
    tft.begin( identifier );
+
    tft.fillScreen( BLACK );
    // 0 = oriented with USB port down.
    // 1 = oriented with USB port right.
@@ -270,6 +295,20 @@ void loop( void )
       tft.print( "Outside:  " );
       tft.println( tempF6 );
       tft.println( "" );
+
+      unsigned int sensorCount = dallasTemp.getDS18Count();
+      if( sensorCount == 0 )
+         zeroSensors++;
+      else
+         zeroSensors = 0;
+      // Reset the one-wire interface if there has been 20 seconds of no sensors detected.
+      if( zeroSensors > 10 )
+      {
+         zeroSensors = 0;
+         setupDallas();
+      }
+      tft.print( "Sensors: " );
+      tft.println( sensorCount );
 
       tft.setTextSize( 2 ),
       tft.setTextColor( WHITE );
