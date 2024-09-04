@@ -2,25 +2,23 @@
 BasedOnStyle:	GNU
 TabWidth:		3
 IndentWidth:	3
-UseTab:			Always
-ColumnLimit:	100
+UseTab:			Never
 
 AlignTrailingComments:						true
 AllowShortFunctionsOnASingleLine:		All
 AllowShortIfStatementsOnASingleLine:	true
-AllowShortBlocksOnASingleLine:			true
+AllowShortBlocksOnASingleLine:			Always
 AllowShortLoopsOnASingleLine:				true
 AlwaysBreakAfterReturnType:				None
-AlwaysBreakAfterDefinitionReturnType:	false
+AlwaysBreakAfterDefinitionReturnType:	None
 BinPackArguments:								false
 BinPackParameters:							false
 BreakBeforeBraces:							Allman
 ColumnLimit:									0
 IndentCaseLabels:								true
 MaxEmptyLinesToKeep:							2
-PointerBindsToType:							false
 ReflowComments:								false
-SortIncludes:									false
+SortIncludes:									Never
 
 SpaceAfterCStyleCast:				false
 SpacesInCStyleCastParentheses:	true
