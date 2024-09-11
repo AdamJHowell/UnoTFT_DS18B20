@@ -80,22 +80,7 @@ void setupDallas()
    Serial.println( " devices." );
 
    // Loop through each device, get its address, and print it
-   for( int i = 0; i < numberOfDevices; i++ )
-   {
-      uint8_t address[8];
-      if( dallasTemp.getAddress( address, i ) )
-      {
-         Serial.print( "Device " );
-         Serial.print( i );
-         Serial.print( " Address: " );
-         printAddress( address );
-      }
-      else
-      {
-         Serial.print( "Unable to find address for Device " );
-         Serial.println( i );
-      }
-   }
+   findDevices();
 
    // Reset the device if this method has been called 5 times.
    if( setupCount > 5 )
