@@ -39,12 +39,29 @@ unsigned long lastPollLoop = 0;
 unsigned int zeroSensors = 0;
 unsigned int setupCount = 0;
 // The temperature variables.
-float tempF1 = 21.12;
-float tempF2 = 21.12;
-float tempF3 = 21.12;
-float tempF4 = 21.12;
-float tempF5 = 21.12;
-float tempF6 = 21.12;
+//float tempF1 = 21.12;
+//float tempF2 = 21.12;
+//float tempF3 = 21.12;
+//float tempF4 = 21.12;
+//float tempF5 = 21.12;
+//float tempF6 = 21.12;
+float temperatures[6] = {21.12, 21.12, 21.12, 21.12, 21.12, 21.12};
+const char labels[6][10] = {
+   "Vent:    ",
+   "Ambient: ",
+   "Floor:   ",
+   "Roof:    ",
+   "Trunk:   ",
+   "Outside: "
+ };
+const int colors[6] = {
+   RED,
+   ORANGE,
+   YELLOW,
+   GREEN,
+   BLUE,
+   WHITE
+ };
 uint8_t errorBits[8] = {0, 0, 0, 0, 0, 0, 0, 0};
 
 

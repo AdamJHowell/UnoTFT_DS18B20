@@ -176,12 +176,14 @@ void pollTelemetry()
 {
    // Request a new temperature reading.
    dallasTemp.requestTemperatures();
-   tempF1 = dallasTemp.getTempFByIndex( 0 );
-   tempF2 = dallasTemp.getTempFByIndex( 1 );
-   tempF3 = dallasTemp.getTempFByIndex( 2 );
-   tempF4 = dallasTemp.getTempFByIndex( 3 );
-   tempF5 = dallasTemp.getTempFByIndex( 4 );
-   tempF6 = dallasTemp.getTempFByIndex( 5 );
+   for( int i = 0; i < 6; i++ )
+      temperatures[i] = dallasTemp.getTempFByIndex( i );
+//   tempF1 = dallasTemp.getTempFByIndex( 0 );
+//   tempF2 = dallasTemp.getTempFByIndex( 1 );
+//   tempF3 = dallasTemp.getTempFByIndex( 2 );
+//   tempF4 = dallasTemp.getTempFByIndex( 3 );
+//   tempF5 = dallasTemp.getTempFByIndex( 4 );
+//   tempF6 = dallasTemp.getTempFByIndex( 5 );
 } // End of pollTelemetry() function.
 
 
@@ -209,26 +211,38 @@ void loop( void )
 
       tft.fillScreen( BLACK );
       tft.setCursor( 0, 0 );
-      tft.setTextSize( 3 ),
+      tft.setTextSize( 3 );
 
-      tft.setTextColor( RED );
-      tft.print( "Vent:    " );
-      tft.println( tempF1 );
-      tft.setTextColor( ORANGE );
-      tft.print( "Ambient: " );
-      tft.println( tempF2 );
-      tft.setTextColor( YELLOW );
-      tft.print( "Floor:   " );
-      tft.println( tempF3 );
-      tft.setTextColor( GREEN );
-      tft.print( "Roof:    " );
-      tft.println( tempF4 );
-      tft.setTextColor( BLUE );
-      tft.print( "Trunk:   " );
-      tft.println( tempF5 );
-      tft.setTextColor( WHITE );
-      tft.print( "Outside: " );
-      tft.println( tempF6 );
+      for( int i = 0; i < 6; i++ )
+      {
+         tft.setTextColor( colors[i] );
+         tft.print( labels[i] );
+         tft.println( temperatures[0] );
+      }
+//      tft.setTextColor( RED );
+//      tft.print( "Vent:    " );
+////      tft.println( tempF1 );
+//      tft.println( temperatures[0] );
+//      tft.setTextColor( ORANGE );
+//      tft.print( "Ambient: " );
+////      tft.println( tempF2 );
+//      tft.println( temperatures[1] );
+//      tft.setTextColor( YELLOW );
+//      tft.print( "Floor:   " );
+////      tft.println( tempF3 );
+//      tft.println( temperatures[2] );
+//      tft.setTextColor( GREEN );
+//      tft.print( "Roof:    " );
+////      tft.println( tempF4 );
+//      tft.println( temperatures[3] );
+//      tft.setTextColor( BLUE );
+//      tft.print( "Trunk:   " );
+////      tft.println( tempF5 );
+//      tft.println( temperatures[4] );
+//      tft.setTextColor( WHITE );
+//      tft.print( "Outside: " );
+////      tft.println( tempF6 );
+//      tft.println( temperatures[5] );
 
       tft.setTextSize( 2 ),
       tft.setTextColor( WHITE );
